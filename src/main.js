@@ -17,7 +17,7 @@ function onFormSubmit(e) {
 
   getImage(query).then(data => {
     // console.log(data);
-    renderImage(data);
+    renderImage(data.hits);
   });
 
   e.target.reset();
@@ -85,11 +85,12 @@ function imageTemplate({
           </ul>
         </li>`;
 }
+
 function generateItemListTemplate(hits) {
   return hits.map(imageTemplate).join('');
 }
 
-function renderImage() {
-  const markup = generateItemListTemplate(hits);
+function renderImage(dataHits) {
+  const markup = generateItemListTemplate(dataHits);
   refs.galleryContainer.innerHTML = markup;
 }
