@@ -25,21 +25,41 @@
 }
 
 body {
-  width: 1440px;
+
   margin: 0;
   padding: 0;
   background-color: #FFF;
 }
 
-
+.form-gallery {
+  width: 1440px;
+  padding-left: 156px;
+  padding-right: 156px;
+  padding-top: 36px;
+}
 
 .form-inline {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding-top: 36px;
+  padding-bottom: 32px;
   height: 40px;
+}
+
+.gallery-item {
+  width: calc((100% - 48px) / 3);
+  width: 360px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.gallery-link {}
+
+.gallery-image {
+  width: 360px;
+  height: 200px;
+  transition: transform 0.3s ease-in-out;
 }
 
 .form-control {
@@ -82,9 +102,6 @@ body {
   display: flex;
   flex-wrap: wrap;
   list-style: none;
-  width: 1440px;
-  padding-left: 156px;
-  padding-right: 156px;
   justify-content: center;
   align-items: center;
   row-gap: 24px;
