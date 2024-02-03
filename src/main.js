@@ -10,16 +10,48 @@ const refs = {
 
 refs.formSearch.addEventListener('submit', onFormSubmit);
 
+const lightbox = new SimpleLightbox('.gallery a', {});
+
 function onFormSubmit(e) {
   e.preventDefault();
 
-  const query = e.target.elements.query.value;
+  const query = e.target.elements.query.value.trim();
+
+  if (!query) {
+    iziToast.warning({
+      title: 'Caution',
+      titleColor: '#FFFFFF',
+      message: 'Please enter text to search',
+      position: 'topRight',
+      messageColor: '#FFFFFF',
+      backgroundColor: '#4169E1',
+      iconUrl: null,
+    });
+    return;
+  }
 
   getImage(query).then(data => {
-    // console.log(data);
-    renderImage(data.hits);
-  });
+    const result = {
+      images: data.hits || [],
+      total: data.total || 0,
+    };
 
+    if (result.images.length === 0) {
+      iziToast.warning({
+        titleColor: '#FFFFFF',
+        message:
+          'Sorry, there are no images matching your search query. Please try again.',
+        messageSize: '16px',
+        position: 'topRight',
+        messageColor: '#FFFFFF',
+        backgroundColor: '#EF4040',
+        iconUrl: null,
+      });
+    }
+    renderImage(data.hits);
+
+    lightbox.refresh();
+  });
   e.target.reset();
 }
 
@@ -37,7 +69,18 @@ function getImage(hit) {
       }
       return res.json();
     })
-    .catch(error => console.error('Error fetching data:', error));
+    .catch(error => {
+      iziToast.error({
+        title: 'Error',
+        titleColor: '#FFFFFF',
+        message: 'An error occurred while fetching data. Please try again.',
+        position: 'topRight',
+        messageColor: '#FFFFFF',
+        backgroundColor: '#FF6347',
+        iconUrl: null,
+      });
+      console.error('Error fetching data:', error);
+    });
 }
 
 function imageTemplate({
@@ -58,27 +101,27 @@ function imageTemplate({
             />
           </a>
           <ul class="data-image">
-            <li class="data-item">
-              <div>
-                <span>Likes</span>
+            <li>
+              <div class="data-item">
+                <span class="image-property">Likes</span>
                 <span>${likes}</span>
               </div>
             </li>
-            <li class="data-item">
-              <div>
-                <span>Views</span>
+            <li>
+              <div class="data-item">
+                <span class="image-property">Views</span>
                 <span>${views}</span>
               </div>
             </li>
-            <li class="data-item">
-              <div>
-                <span>Comments</span>
+            <li>
+              <div class="data-item">
+                <span class="image-property">Comments</span>
                 <span>${comments}</span>
               </div>
             </li>
-            <li  class="data-item">
-              <div>
-                <span>Downloads</span>
+            <li">
+              <div class="data-item">
+                <span class="image-property">Downloads</span>
                 <span>${downloads}</span>
               </div>
             </li>
@@ -86,11 +129,11 @@ function imageTemplate({
         </li>`;
 }
 
-function generateItemListTemplate(hits) {
+function imagesTemplate(hits) {
   return hits.map(imageTemplate).join('');
 }
 
-function renderImage(dataHits) {
-  const markup = generateItemListTemplate(dataHits);
+function renderImage(Hits) {
+  const markup = imagesTemplate(Hits);
   refs.galleryContainer.innerHTML = markup;
 }
