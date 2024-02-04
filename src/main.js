@@ -3,19 +3,18 @@ import 'izitoast/dist/css/iziToast.min.css';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
-const refs = {
-  formSearch: document.querySelector('.form-inline'),
-  galleryContainer: document.querySelector('.gallery'),
-};
+const formSearch = document.querySelector('.form-inline');
+const galleryContainer = document.querySelector('.gallery');
+const loader = document.querySelector('.loader');
 
-refs.formSearch.addEventListener('submit', onFormSubmit);
+formSearch.addEventListener('submit', onFormSubmit);
 
 const lightbox = new SimpleLightbox('.gallery a', {});
 
-function onFormSubmit(e) {
-  e.preventDefault();
+function onFormSubmit(event) {
+  event.preventDefault();
 
-  const query = e.target.elements.query.value.trim();
+  const query = event.target.elements.query.value;
 
   if (!query) {
     iziToast.warning({
@@ -29,30 +28,44 @@ function onFormSubmit(e) {
     });
     return;
   }
+  galleryContainer.innerHTML = '';
+  loader.style.display = 'block';
 
-  getImage(query).then(data => {
-    const result = {
-      images: data.hits || [],
-      total: data.total || 0,
-    };
+  getImage(query)
+    .then(function ({ hits, total }) {
+      if (Array.isArray(hits) && hits.length > 0 && total > 0) {
+        renderImage(hits);
 
-    if (result.images.length === 0) {
-      iziToast.warning({
+        lightbox.refresh();
+      } else {
+        iziToast.warning({
+          titleColor: '#FFFFFF',
+          message:
+            'Sorry, there are no images matching your search query. Please try again.',
+          messageSize: '16px',
+          position: 'topRight',
+          messageColor: '#FFFFFF',
+          backgroundColor: '#EF4040',
+          iconUrl: null,
+        });
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+      iziToast.error({
+        title: 'Error',
         titleColor: '#FFFFFF',
-        message:
-          'Sorry, there are no images matching your search query. Please try again.',
-        messageSize: '16px',
+        message: 'An error occurred while fetching data. Please try again.',
         position: 'topRight',
         messageColor: '#FFFFFF',
-        backgroundColor: '#EF4040',
+        backgroundColor: '#FF6347',
         iconUrl: null,
       });
-    }
-    renderImage(data.hits);
-
-    lightbox.refresh();
-  });
-  e.target.reset();
+    })
+    .finally(function () {
+      event.target.reset();
+      loader.style.display = 'none';
+    });
 }
 
 function getImage(hit) {
@@ -80,6 +93,7 @@ function getImage(hit) {
         iconUrl: null,
       });
       console.error('Error fetching data:', error);
+      throw error;
     });
 }
 
@@ -92,7 +106,7 @@ function imageTemplate({
   comments,
   downloads,
 }) {
-  return `<li class="gallery-item">
+  return ` <li class="gallery-item">
           <a class="gallery-link" href="${largeImageURL}">
             <img
               class="gallery-image"
@@ -135,5 +149,5 @@ function imagesTemplate(hits) {
 
 function renderImage(Hits) {
   const markup = imagesTemplate(Hits);
-  refs.galleryContainer.innerHTML = markup;
+  galleryContainer.innerHTML = markup;
 }
