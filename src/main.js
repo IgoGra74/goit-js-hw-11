@@ -14,7 +14,7 @@ const lightbox = new SimpleLightbox('.gallery a', {});
 function onFormSubmit(event) {
   event.preventDefault();
 
-  const query = event.target.elements.query.value;
+  const query = event.target.elements.query.value.trim();
 
   if (!query) {
     iziToast.warning({
